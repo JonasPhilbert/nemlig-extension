@@ -13,7 +13,6 @@
     let productsListElement = document.querySelector(".productlist-show-all__item-container")
     let productElements = document.querySelectorAll(".productlist-item");
 
-    // let headerElement = document.querySelector(".site-header__logo-link");
     let headerElement = document.querySelector(".site-header__content");
 
     let sortSavingsBtn = document.createElement("button");
@@ -22,7 +21,7 @@
     headerElement.parentNode.prepend(sortSavingsBtn);
 
     let sortKiloPriceBtn = document.createElement("button");
-    sortKiloPriceBtn.innerText = "Sort by kilo price";
+    sortKiloPriceBtn.innerText = "Sort by kilo/litre price";
     sortKiloPriceBtn.addEventListener("click", () => { sortByKiloPrice() });
     headerElement.parentNode.prepend(sortKiloPriceBtn);
 
@@ -42,7 +41,7 @@
             // Only checks for products with direct savings, not X for Y specials.
             let priceElement = productElement.querySelector(".pricecontainer.has-campaign")
 
-            if (priceElement) {
+            if (priceElement && !productElement.fp_percentSaving) {
                 let campaignPriceElement = priceElement.children[0];
                 let basePriceElement = priceElement.children[1];
 
@@ -83,10 +82,11 @@
     }
 
     function sortByKiloPrice() {
-        console.log("Sorting products by kilo price.");
+        console.log("Sorting products by kilo/litre price.");
         let productElementsArray = Array.prototype.slice.call(productElements, 0);
 
         productElementsArray.sort((a, b) => {
+            if (a.querySelector(".pricecontainer-unitprice__label").innerText == "kr./Stk." || b.querySelector(".pricecontainer-unitprice__label").innerText == "kr./Stk.") return 1;
             let aPrice = a.querySelector(".pricecontainer-unitprice__campaign-price").innerText || a.querySelector(".pricecontainer-unitprice__base-price").innerText;
             let bPrice = b.querySelector(".pricecontainer-unitprice__campaign-price").innerText || b.querySelector(".pricecontainer-unitprice__base-price").innerText;
 
@@ -104,9 +104,11 @@
         })
     }
 
-    setTimeout(calculatePercentSavings, 2000);
+    // Doesn't work?
+    // window.onhashchange = function () {
+    //     setTimeout(calculatePercentSavings, 3000);
+    // }
 
-    // sortByPercentSavings();
-    // sortByKiloPrice();
+    setTimeout(calculatePercentSavings, 3000);
 
 })();
