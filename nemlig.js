@@ -66,7 +66,7 @@
 
     function sortByPercentSavings() {
         console.log("Sorting products by percentage savings.");
-        productElementsArray = Array.prototype.slice.call(productElements, 0);
+        let productElementsArray = Array.prototype.slice.call(productElements, 0);
 
         productElementsArray.sort((a, b) => {
             // Notice the inverted sorting. We want to highest savings first in the array.
@@ -83,7 +83,7 @@
 
     function sortByKiloPrice() {
         console.log("Sorting products by kilo price.");
-        productElementsArray = Array.prototype.slice.call(productElements, 0);
+        let productElementsArray = Array.prototype.slice.call(productElements, 0);
 
         productElementsArray.sort((a, b) => {
             let aPrice = a.querySelector(".pricecontainer-unitprice__campaign-price").innerText || a.querySelector(".pricecontainer-unitprice__base-price").innerText;
