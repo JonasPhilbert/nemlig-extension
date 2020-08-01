@@ -54,7 +54,8 @@
 
                 let percentSaving = (1 - campaignPrice / basePrice) * 100;
 
-                priceElement.appendChild(document.createTextNode(`[${Math.round(percentSaving * 10) / 10}%]`));
+                // priceElement.appendChild(document.createElement("br"));
+                priceElement.appendChild(document.createTextNode(` ${Math.round(percentSaving * 10) / 10}%`));
 
                 productElement.fp_percentSaving = percentSaving;
             } else {
