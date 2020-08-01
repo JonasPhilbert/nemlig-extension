@@ -1,84 +1,111 @@
-let productsListElement = document.querySelector(".productlist-show-all__item-container")
-let productElements = document.querySelectorAll(".productlist-item");
+// ==UserScript==
+// @name         Nemlig Extensions
+// @namespace    fillipuster.com
+// @version      1.0
+// @description  Provides useful functionality to Nemlig.com, such as calculating and sorting by percentage savings.
+// @author       Fillipuster
+// @match        *://www.nemlig.com/*
+// ==/UserScript==
 
-let sortSavingsBtn = document.createElement("button");
-sortSavingsBtn.innerText = "Sort by savings percentage";
-sortSavingsBtn.addEventListener("click", () => { sortByPercentSavings() });
-document.querySelector(".site-header__logo-link").parentNode.appendChild(sortSavingsBtn);
+(function () {
+    'use strict';
 
-let sortKiloPriceBtn = document.createElement("button");
-sortKiloPriceBtn.innerText = "Sort by kilo price";
-sortKiloPriceBtn.addEventListener("click", () => { sortByKiloPrice() });
-document.querySelector(".site-header__logo-link").parentNode.appendChild(sortKiloPriceBtn);
+    let productsListElement = document.querySelector(".productlist-show-all__item-container")
+    let productElements = document.querySelectorAll(".productlist-item");
 
-function calculatePercentSavings() {
-    console.log("Calculating percentage savings for products.");
-    productElements.forEach(productElement => {
-        // Only checks for products with direct savings, not X for Y specials.
-        let priceElement = productElement.querySelector(".pricecontainer.has-campaign")
+    // let headerElement = document.querySelector(".site-header__logo-link");
+    let headerElement = document.querySelector(".site-header__content");
 
-        if (priceElement) {
-            campaignPriceElement = priceElement.children[0];
-            basePriceElement = priceElement.children[1];
+    let sortSavingsBtn = document.createElement("button");
+    sortSavingsBtn.innerText = "Sort by savings percentage";
+    sortSavingsBtn.addEventListener("click", () => { sortByPercentSavings() });
+    headerElement.parentNode.prepend(sortSavingsBtn);
 
-            let campaignPriceStr = campaignPriceElement.children[0].innerText + "." + campaignPriceElement.children[1].innerText;
-            let basePriceStr = basePriceElement.children[0].innerText + "." + basePriceElement.children[1].innerText;
+    let sortKiloPriceBtn = document.createElement("button");
+    sortKiloPriceBtn.innerText = "Sort by kilo price";
+    sortKiloPriceBtn.addEventListener("click", () => { sortByKiloPrice() });
+    headerElement.parentNode.prepend(sortKiloPriceBtn);
 
-            let campaignPrice = parseFloat(campaignPriceStr);
-            let basePrice = parseFloat(basePriceStr);
+    let recalculateSavingsBtn = document.createElement("button");
+    recalculateSavingsBtn.innerText = "Re-calculate percentage savings";
+    recalculateSavingsBtn.addEventListener("click", () => { calculatePercentSavings() });
+    headerElement.parentNode.prepend(recalculateSavingsBtn);
 
-            let percentSaving = (1 - campaignPrice / basePrice) * 100;
+    function calculatePercentSavings() {
+        console.log("Calculating percentage savings for products.");
 
-            priceElement.appendChild(document.createTextNode(`[${Math.round(percentSaving * 10) / 10}%]`));
+        // Refetch elements, as they may be fetched prematurely during initialization
+        productsListElement = document.querySelector(".productlist-show-all__item-container")
+        productElements = document.querySelectorAll(".productlist-item");
 
-            productElement.fp_percentSaving = percentSaving;
-        } else {
-            productElement.fp_percentSaving = -1; // Maybe not the best, but ensures correct sorting.
-        }
+        productElements.forEach(productElement => {
+            // Only checks for products with direct savings, not X for Y specials.
+            let priceElement = productElement.querySelector(".pricecontainer.has-campaign")
 
-    });
-}
+            if (priceElement) {
+                let campaignPriceElement = priceElement.children[0];
+                let basePriceElement = priceElement.children[1];
 
-function sortByPercentSavings() {
-    console.log("Sorting products by percentage savings.");
-    productElementsArray = Array.prototype.slice.call(productElements, 0);
+                let campaignPriceStr = campaignPriceElement.children[0].innerText + "." + campaignPriceElement.children[1].innerText;
+                let basePriceStr = basePriceElement.children[0].innerText + "." + basePriceElement.children[1].innerText;
 
-    productElementsArray.sort((a, b) => {
-        // Notice the inverted sorting. We want to highest savings first in the array.
-        if (a.fp_percentSaving > b.fp_percentSaving) return -1;
-        if (a.fp_percentSaving < b.fp_percentSaving) return 1;
-        return 0
-    });
+                let campaignPrice = parseFloat(campaignPriceStr);
+                let basePrice = parseFloat(basePriceStr);
 
-    productsListElement.innerHTML = "";
-    productElementsArray.forEach(e => {
-        productsListElement.appendChild(e);
-    })
-}
+                let percentSaving = (1 - campaignPrice / basePrice) * 100;
 
-function sortByKiloPrice() {
-    console.log("Sorting products by kilo price.");
-    productElementsArray = Array.prototype.slice.call(productElements, 0);
+                priceElement.appendChild(document.createTextNode(`[${Math.round(percentSaving * 10) / 10}%]`));
 
-    productElementsArray.sort((a, b) => {
-        let aPrice = a.querySelector(".pricecontainer-unitprice__campaign-price").innerText || a.querySelector(".pricecontainer-unitprice__base-price").innerText;
-        let bPrice = b.querySelector(".pricecontainer-unitprice__campaign-price").innerText || b.querySelector(".pricecontainer-unitprice__base-price").innerText;
+                productElement.fp_percentSaving = percentSaving;
+            } else {
+                productElement.fp_percentSaving = -1; // Maybe not the best, but ensures correct sorting.
+            }
 
-        aPrice = parseFloat(aPrice);
-        bPrice = parseFloat(bPrice);
+        });
+    }
 
-        if (aPrice > bPrice) return 1;
-        if (aPrice < bPrice) return -1;
-        return 0
-    });
+    function sortByPercentSavings() {
+        console.log("Sorting products by percentage savings.");
+        productElementsArray = Array.prototype.slice.call(productElements, 0);
 
-    productsListElement.innerHTML = "";
-    productElementsArray.forEach(e => {
-        productsListElement.appendChild(e);
-    })
-}
+        productElementsArray.sort((a, b) => {
+            // Notice the inverted sorting. We want to highest savings first in the array.
+            if (a.fp_percentSaving > b.fp_percentSaving) return -1;
+            if (a.fp_percentSaving < b.fp_percentSaving) return 1;
+            return 0
+        });
 
-calculatePercentSavings();
+        productsListElement.innerHTML = "";
+        productElementsArray.forEach(e => {
+            productsListElement.appendChild(e);
+        })
+    }
 
-// sortByPercentSavings();
-// sortByKiloPrice();
+    function sortByKiloPrice() {
+        console.log("Sorting products by kilo price.");
+        productElementsArray = Array.prototype.slice.call(productElements, 0);
+
+        productElementsArray.sort((a, b) => {
+            let aPrice = a.querySelector(".pricecontainer-unitprice__campaign-price").innerText || a.querySelector(".pricecontainer-unitprice__base-price").innerText;
+            let bPrice = b.querySelector(".pricecontainer-unitprice__campaign-price").innerText || b.querySelector(".pricecontainer-unitprice__base-price").innerText;
+
+            aPrice = parseFloat(aPrice);
+            bPrice = parseFloat(bPrice);
+
+            if (aPrice > bPrice) return 1;
+            if (aPrice < bPrice) return -1;
+            return 0
+        });
+
+        productsListElement.innerHTML = "";
+        productElementsArray.forEach(e => {
+            productsListElement.appendChild(e);
+        })
+    }
+
+    setTimeout(calculatePercentSavings, 2000);
+
+    // sortByPercentSavings();
+    // sortByKiloPrice();
+
+})();
